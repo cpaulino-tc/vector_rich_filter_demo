@@ -1,0 +1,9 @@
+services:
+  web:
+    image: timberio/vector:latest-debian
+      #user: vector
+      #environment:
+      #- VECTOR_LOG=debug
+    volumes:
+      - ./vector.toml:/etc/vector/vector.toml:ro
+      - ./envs.csv:/etc/vector/envs.csv

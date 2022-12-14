@@ -1,0 +1,6 @@
+group,environment
+np,test_environment
+np,testb_environment
+np,testc_environment
+np,testd_environment
+prod,prod_environment

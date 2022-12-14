@@ -1,0 +1,52 @@
+[sources.demo_logs]
+type = "demo_logs"
+interval = 5.0
+format = "syslog"
+
+# add a valid environment
+[transforms.demo_remap]
+type = "remap"
+inputs = ["demo_logs" ]
+source = '''
+  .env = "testb_environment"
+'''
+
+# definition of an envs table with environment definitions
+[enrichment_tables.envs]
+type = "file"
+
+# envs file table
+[enrichment_tables.envs.file]
+path = "/etc/vector/envs.csv"
+
+#path = "./envs.csv"
+encoding = { type = "csv" }
+
+# schema for env table
+[enrichment_tables.envs.schema]
+group= "string"
+environment ="string"
+
+# VRL filter using the env table
+[transforms.demo_filter]
+type = "filter"
+inputs = ["demo_remap" ]
+condition= '''
+  # get all the records with group prod and np
+  env_raw =find_enrichment_table_records!("envs", {"group": "prod", "group": "np" })
+  # define an array
+  envs= []
+  # add the environments to envs array
+  for_each(env_raw) -> | index,item| { envs=append(envs,[item.environment]) }
+  # test for envs
+  includes(array(envs), .env)
+'''
+
+# it should display a random message in each five seconds
+[sinks.console]
+#inputs = ["demo*"]
+inputs = ["demo_filter"]
+target = "stdout"
+type = "console"
+encoding.codec = "json"
+
